@@ -1,0 +1,66 @@
+# Configure a default setup of Home Assistant (frontend, api, etc)
+default_config:
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+sensor: !include sensor.yaml
+mqtt: !include mqtt.yaml
+group: !include groups.yaml
+binary_sensor: !include binary_sensor.yaml
+
+switch:
+  - platform: template
+    switches: !include switches.yaml
+
+cover:
+  - platform: template
+    covers:
+      garage_door_left:
+        friendly_name: "Garage Door Left"
+        device_class: garage
+        value_template: >-
+          {% set state = states('sensor.garage_door_left_status') %}
+          {% if state == 'closed' %}
+            closed
+          {% elif state == 'open' %}
+            open
+          {% else %}
+            opening
+          {% endif %}
+        open_cover:
+          service: rest_command.garage_left_trigger
+        close_cover:
+          service: rest_command.garage_left_trigger
+        stop_cover:
+          service: rest_command.garage_left_trigger
+  - platform: template
+    covers:
+      garage_door_right:
+        friendly_name: "Garage Door Right"
+        device_class: garage
+        value_template: >-
+          {% set state = states('sensor.garage_door_right_status') %}
+          {% if state == 'closed' %}
+            closed
+          {% elif state == 'open' %}
+            open
+          {% else %}
+            opening
+          {% endif %}
+        open_cover:
+          service: rest_command.garage_right_trigger
+        close_cover:
+          service: rest_command.garage_right_trigger
+        stop_cover:
+          service: rest_command.garage_right_trigger
+           
+rest_command:
+  garage_left_trigger:
+    url: "http://192.168.1.100:8080/trigger?key=Password1"
+    method: get
+    content_type: "application/json"
+  garage_right_trigger:
+    url: "http://192.168.1.102:8080/trigger?key=Password2"
+    method: get
+    content_type: "application/json"
